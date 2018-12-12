@@ -125,6 +125,7 @@ namespace ProjetoEDA2
             Node cofre1 = Find(c1);
             Node cofre2 = Find(c2);
             Node cofre3 = Find(c3);
+            Node cofreMaisPerto = CofreMaisPerto(begin, cofre1, cofre2, cofre3);
 
             begin.Visited = true;
             caminho.Add(begin);
@@ -143,7 +144,8 @@ namespace ProjetoEDA2
                         e.To.Visited = true;
                         caminho.Add(e.To);
                     }
-                    if (isCofre(e.To, cofre1, cofre2, cofre3) && GetQtdeCofresVisitados(cofre1, cofre2, cofre3) == 3)
+                    //if (isCofre(cofreMaisPerto, cofre1, cofre2, cofre3) && GetQtdeCofresVisitados(cofre1, cofre2, cofre3) == 3)
+                    if (e.To == cofreMaisPerto)
                     {
                         Node x = e.To;
                         while(x.Parent != null)
@@ -168,12 +170,14 @@ namespace ProjetoEDA2
 
             int menor = Math.Min(num1, num2);
 
-            if (menor > num3)
+            if (menor > num3 && cofre3.Visited == false)
                 return cofre3;
-            else if (menor == num2)
+            else if (menor == num2 && cofre2.Visited == false)
                 return cofre2;
+            else if (cofre1.Visited == false)
+                return cofre1;
 
-            return cofre1;
+            return null;
         }
 
         public void SetCofresVisitados(Node n, Node v1, Node v2, Node v3)
