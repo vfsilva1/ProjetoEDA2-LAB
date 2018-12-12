@@ -126,6 +126,7 @@ namespace ProjetoEDA2
             Node cofre2 = Find(c2);
             Node cofre3 = Find(c3);
             Node cofreMaisPerto = CofreMaisPerto(begin, cofre1, cofre2, cofre3);
+            Console.WriteLine(cofreMaisPerto.Name);
 
             begin.Visited = true;
             caminho.Add(begin);
@@ -134,7 +135,7 @@ namespace ProjetoEDA2
             while (q.Count > 0)
             {
                 Node n = q.Dequeue();
-                SetCofresVisitados(n, cofre1, cofre2, cofre3);
+                //SetCofresVisitados(n, cofre1, cofre2, cofre3);
                 foreach (Edge e in n.Edges)
                 {
                     if (e.To.Visited == false && e.To.Name != "W")
@@ -144,50 +145,82 @@ namespace ProjetoEDA2
                         e.To.Visited = true;
                         caminho.Add(e.To);
                     }
-                    //if (isCofre(cofreMaisPerto, cofre1, cofre2, cofre3) && GetQtdeCofresVisitados(cofre1, cofre2, cofre3) == 3)
-                    if (e.To == cofreMaisPerto)
+                    //if (e.To == cofreMaisPerto)
+                    if (isCofre(e.To, cofre1, cofre2, cofre3) /*&& GetQtdeCofresVisitados(cofre1, cofre2, cofre3) == 3*/)
                     {
-                        Node x = e.To;
-                        while(x.Parent != null)
-                        {
-                            Console.WriteLine(x.Name);
-                            x = x.Parent;
-                        }
-                        Console.WriteLine(x.Name);
-                        return caminho;
+                        PrintAnswer(e.To);
+                        Console.WriteLine();
                     }
+                    //else if (isCofre(e.To, cofre1, cofre2, cofre3) && GetQtdeCofresVisitados(cofre1, cofre2, cofre3) < 3)
+                    //{
+                    //    cofreMaisPerto = CofreMaisPerto(e.To, cofre1, cofre2, cofre3);
+                    //}
                 }
             }
             return caminho;
         }
 
-        public Node CofreMaisPerto (Node ladrao, Node cofre1, Node cofre2, Node cofre3)
+        public Node CofreMaisPerto (Node inicio, Node cofre1, Node cofre2, Node cofre3)
         {
             //distancia euclideana
-            int num1 = Math.Abs(ladrao.x - cofre1.x) + Math.Abs(ladrao.y - cofre1.y);
-            int num2 = Math.Abs(ladrao.x - cofre2.x) + Math.Abs(ladrao.y - cofre2.y);
-            int num3 = Math.Abs(ladrao.x - cofre3.x) + Math.Abs(ladrao.y - cofre3.y);
+            int num1 = Math.Abs(inicio.x - cofre1.x) + Math.Abs(inicio.y - cofre1.y);
+            int num2 = Math.Abs(inicio.x - cofre2.x) + Math.Abs(inicio.y - cofre2.y);
+            int num3 = Math.Abs(inicio.x - cofre3.x) + Math.Abs(inicio.y - cofre3.y);
 
-            int menor = Math.Min(num1, num2);
+            //int menor = Math.Min(num1, num2);
+            List<int> lstNum = new List<int>();
+            lstNum.Add(num1);
+            lstNum.Add(num2);
+            lstNum.Add(num3);
+            lstNum.Sort();
 
-            if (menor > num3 && cofre3.Visited == false)
-                return cofre3;
-            else if (menor == num2 && cofre2.Visited == false)
-                return cofre2;
-            else if (cofre1.Visited == false)
-                return cofre1;
+            foreach (int num in lstNum)
+            {
+                if (num == num1 && cofre1.Visited == false)
+                    return cofre1;
+                else if (num == num2 && cofre2.Visited == false)
+                    return cofre2;
+                else if (num == num3 && cofre3.Visited == false)
+                    return cofre3;
+            }
+
+            //if (menor > num3 && cofre3.Visited == false)
+            //    return cofre3;
+            //else if (menor == num2 && cofre2.Visited == false)
+            //    return cofre2;
+            //else if (cofre1.Visited == false)
+            //    return cofre1;
 
             return null;
         }
 
-        public void SetCofresVisitados(Node n, Node v1, Node v2, Node v3)
+        public void PrintAnswer (Node destino)
         {
-            if (n == v1)
-                v1.Visited = true;
-            else if (n == v2)
-                v2.Visited = true;
-            else if (n == v3)
-                v3.Visited = true;
+            List<Node> answer = new List<Node>();
+            while (destino.Parent != null)
+            {
+                answer.Add(destino);
+                destino = destino.Parent;
+            }
+            answer.Add(destino);
+
+            for (int i = answer.Count - 1; i >= 0; i--)
+            {
+                //if (i > 0)
+                    Console.Write(answer[i].Name + "->");
+                //else
+                //    Console.Write(answer[i].Name);
+            }
+        }
+
+        public void SetCofresVisitados(Node n, Node c1, Node c2, Node c3)
+        {
+            if (n == c1)
+                c1.Visited = true;
+            else if (n == c2)
+                c2.Visited = true;
+            else if (n == c3)
+                c3.Visited = true;
         }
 
         public int GetQtdeCofresVisitados(Node v1, Node v2, Node v3)
