@@ -69,21 +69,117 @@ namespace ProjetoEDA2
             Console.Clear();
             printSala(grafo.nodes, tam);
 
-            //Console.WriteLine("GetNeighbours: ");
-            //string letra = Console.ReadLine();
-            //foreach (Node n in grafo.GetNeighbours(letra))
-            //{
-            //    Console.WriteLine(n.Name);
-            //}
+            //GetNeighbours(grafo);
 
-            List<Node> caminho = grafo.ShortestPath("L", "C1", "C2", "C3");
-            //Console.WriteLine(caminho.Count);
-            //foreach (Node n in caminho)
-            //{
-            //    Console.WriteLine(n.Name);
-            //}
+            Node L = grafo.Find("L");
+            Node C1 = grafo.Find("C1");
+            Node C2 = grafo.Find("C2");
+            Node C3 = grafo.Find("C3");
+
+            List<Node> destinos = CofresMaisPerto(L, C1, C2, C3);
+            List<Node> caminho1 = grafo.ShortestPath("L", destinos[0].Name);
+            Console.Write("L->");
+            PrintPath(caminho1[caminho1.Count - 1]);
+            Console.Write("->");
+
+            Graph g2 = new Graph();
+            createGraph(g2, tam);
+            setCoordinates(g2.nodes, tam);
+            setSala(g2.nodes, tam);
+            setLadrao(g2.nodes, tam, ladraoX, ladraoY);
+            setCofres(g2.nodes, tam, cofre1X, cofre1Y, cont = 1);
+            setCofres(g2.nodes, tam, cofre2X, cofre2Y, cont = 2);
+            setCofres(g2.nodes, tam, cofre3X, cofre3Y, cont = 3);
+            setEdges(g2, tam);
+
+            Node proximo = proxCofre(destinos[0], destinos[1], destinos[2]);
+            List<Node> caminho2 = g2.ShortestPath(destinos[0].Name, proximo.Name);
+            PrintPath(caminho2[caminho2.Count - 1]);
+            Console.Write("->");
+
+            Graph g3 = new Graph();
+            createGraph(g3, tam);
+            setCoordinates(g3.nodes, tam);
+            setSala(g3.nodes, tam);
+            setLadrao(g3.nodes, tam, ladraoX, ladraoY);
+            setCofres(g3.nodes, tam, cofre1X, cofre1Y, cont = 1);
+            setCofres(g3.nodes, tam, cofre2X, cofre2Y, cont = 2);
+            setCofres(g3.nodes, tam, cofre3X, cofre3Y, cont = 3);
+            setEdges(g3, tam);
+
+            Node fim = null;
+            if (proximo == destinos[1])
+                fim = destinos[2];
+            else
+                fim = destinos[1];
+
+            List<Node> caminho3 = g3.ShortestPath(proximo.Name, fim.Name);
+            PrintPath(caminho3[caminho3.Count - 1]);
 
             Console.ReadKey();
+        }
+
+        public static Node proxCofre (Node cofreAtual, Node cofre1, Node cofre2)
+        {
+            double num1 = Math.Sqrt(Math.Pow(cofreAtual.x - cofre1.x, 2) + Math.Pow(cofreAtual.y - cofre1.y, 2));
+            double num2 = Math.Sqrt(Math.Pow(cofreAtual.x - cofre2.x, 2) + Math.Pow(cofreAtual.y - cofre2.y, 2));
+
+            if (num1 < num2)
+                return cofre1;
+            else
+                return cofre2;
+        }
+
+        public static void PrintPath (Node path)
+        {
+            List<Node> caminho = new List<Node>();
+            while (path.Parent != null)
+            {
+                caminho.Add(path);
+                path = path.Parent;
+            }
+
+            for (int i = caminho.Count - 1; i >= 0; i--)
+            {
+                if (i > 0)
+                    Console.Write(caminho[i].Name + "->");
+                else
+                    Console.Write(caminho[i].Name);
+            }
+        }
+
+        public static List<Node> CofresMaisPerto(Node inicio, Node cofre1, Node cofre2, Node cofre3)
+        {
+            double num1 = Math.Sqrt(Math.Pow(inicio.x - cofre1.x, 2) + Math.Pow(inicio.y - cofre1.y, 2));
+            double num2 = Math.Sqrt(Math.Pow(inicio.x - cofre2.x, 2) + Math.Pow(inicio.y - cofre2.y, 2));
+            double num3 = Math.Sqrt(Math.Pow(inicio.x - cofre3.x, 2) + Math.Pow(inicio.y - cofre3.y, 2));
+            List<double> lstNum = new List<double>();
+            lstNum.Add(num1);
+            lstNum.Add(num2);
+            lstNum.Add(num3);
+            lstNum.Sort();
+            List<Node> cofres = new List<Node>();
+            for (int i = 0; i < lstNum.Count; i++)
+            {
+                double n = lstNum[i];
+                if (n == num1)
+                    cofres.Add(cofre1);
+                if (n == num2)
+                    cofres.Add(cofre2);
+                if (n == num3)
+                    cofres.Add(cofre3);
+            }
+            return cofres;
+        }
+
+        public static void GetNeighbours (Graph grafo)
+        {
+            Console.WriteLine("GetNeighbours: ");
+            string letra = Console.ReadLine();
+            foreach (Node n in grafo.GetNeighbours(letra))
+            {
+                Console.WriteLine(n.Name);
+            }
         }
 
         public static void setEdges(Graph g, int tam)
@@ -120,8 +216,6 @@ namespace ProjetoEDA2
                 {
                     if (isWall(tam, j, i))
                         nodes[cont].Name = "W";
-                    //else
-                    //    nodes[cont].Name = "0";
 
                     cont++;
                 }

@@ -49,7 +49,7 @@ namespace ProjetoEDA2
         /// </summary>
         /// <param name="name">O nome do nó.</param>
         /// <returns>O nó encontrado ou nulo caso não encontre nada.</returns>
-        private Node Find(string name)
+        public Node Find(string name)
         {
             Node n = null;
             foreach (Node node in nodes)
@@ -117,25 +117,26 @@ namespace ProjetoEDA2
             return neighbours;
         }
 
-        public List<Node> ShortestPath (string inicio, string c1, string c2, string c3)
+        public List<Node> ShortestPath (string inicio, string destino)
         {
             List<Node> caminho = new List<Node>();
             Queue<Node> q = new Queue<Node>();
             Node begin = Find(inicio);
-            Node cofre1 = Find(c1);
-            Node cofre2 = Find(c2);
-            Node cofre3 = Find(c3);
-            Node cofreMaisPerto = CofreMaisPerto(begin, cofre1, cofre2, cofre3);
-            Console.WriteLine(cofreMaisPerto.Name);
+            Node end = Find(destino);
+            //Node cofre1 = Find(c1);
+            //Node cofre2 = Find(c2);
+            //Node cofre3 = Find(c3);
+            //Node cofreMaisPerto = CofreMaisPerto(begin, cofre1, cofre2, cofre3);
+            //if (begin.Parent != null)
+            //    begin.Parent.Visited = false;
 
             begin.Visited = true;
-            caminho.Add(begin);
             q.Enqueue(begin);
+            caminho.Add(begin);
 
             while (q.Count > 0)
             {
                 Node n = q.Dequeue();
-                //SetCofresVisitados(n, cofre1, cofre2, cofre3);
                 foreach (Edge e in n.Edges)
                 {
                     if (e.To.Visited == false && e.To.Name != "W")
@@ -144,12 +145,12 @@ namespace ProjetoEDA2
                         e.To.Parent = n;
                         e.To.Visited = true;
                         caminho.Add(e.To);
-                    }
-                    //if (e.To == cofreMaisPerto)
-                    if (isCofre(e.To, cofre1, cofre2, cofre3) /*&& GetQtdeCofresVisitados(cofre1, cofre2, cofre3) == 3*/)
-                    {
-                        PrintAnswer(e.To);
-                        Console.WriteLine();
+
+                        if (e.To == end)
+                        {
+                            return caminho;
+                        }
+
                     }
                     //else if (isCofre(e.To, cofre1, cofre2, cofre3) && GetQtdeCofresVisitados(cofre1, cofre2, cofre3) < 3)
                     //{
@@ -162,17 +163,28 @@ namespace ProjetoEDA2
 
         public Node CofreMaisPerto (Node inicio, Node cofre1, Node cofre2, Node cofre3)
         {
-            //distancia euclideana
-            int num1 = Math.Abs(inicio.x - cofre1.x) + Math.Abs(inicio.y - cofre1.y);
-            int num2 = Math.Abs(inicio.x - cofre2.x) + Math.Abs(inicio.y - cofre2.y);
-            int num3 = Math.Abs(inicio.x - cofre3.x) + Math.Abs(inicio.y - cofre3.y);
+            double num1 = -1;
+            double num2 = -1;
+            double num3 = -1;
+
+            //distancia euclidiana
+            if (cofre1 != null)
+                num1 = Math.Sqrt(Math.Pow(inicio.x - cofre1.x, 2) + Math.Pow(inicio.y - cofre1.y, 2));
+            if (cofre2 != null)
+                num2 = Math.Sqrt(Math.Pow(inicio.x - cofre2.x, 2) + Math.Pow(inicio.y - cofre2.y, 2));
+            if (cofre3 != null)
+                num3 = Math.Sqrt(Math.Pow(inicio.x - cofre3.x, 2) + Math.Pow(inicio.y - cofre3.y, 2));
 
             //int menor = Math.Min(num1, num2);
-            List<int> lstNum = new List<int>();
+            List<double> lstNum = new List<double>();
             lstNum.Add(num1);
             lstNum.Add(num2);
             lstNum.Add(num3);
             lstNum.Sort();
+
+            for (int i = 0; i < lstNum.Count; i++)
+                if (lstNum[i] == -1)
+                    lstNum.Remove(lstNum[i]);
 
             foreach (int num in lstNum)
             {
@@ -183,13 +195,6 @@ namespace ProjetoEDA2
                 else if (num == num3 && cofre3.Visited == false)
                     return cofre3;
             }
-
-            //if (menor > num3 && cofre3.Visited == false)
-            //    return cofre3;
-            //else if (menor == num2 && cofre2.Visited == false)
-            //    return cofre2;
-            //else if (cofre1.Visited == false)
-            //    return cofre1;
 
             return null;
         }
